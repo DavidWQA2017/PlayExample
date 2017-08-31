@@ -44,3 +44,15 @@ GET /posts                          controllers.Default.todo
 GET /cookie                         controllers.Application.cookieCreate
 GET /cookie/cn                      controllers.Application.changeCookieName
 GET /cookie/del                     controllers.Application.cookieDelete
+GET /session                        controllers.Application.newSession
+GET /session/Info                   controllers.Application.readSessionInfo
+GET /session/discard                controllers.Application.discardSession
+GET /flash                          controllers.Application.createFlashScope
+
+
+#cd form submission example
+GET         /cds                     controllers.Application.listCDs
+POST        /cds                     controllers.Application.createCD
+
+#Game STore Task
+GET /ghome                            controllers.Application.gameStoreHome
