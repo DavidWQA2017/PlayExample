@@ -2,6 +2,9 @@ package controllers
 
 
 import javax.inject.Inject
+import play.api.mvc.Controller
+import play.modules.reactivemongo._
+
 
 import models.{CD, Game}
 import play.api._
@@ -12,7 +15,7 @@ import play.mvc.Http
 import scala.concurrent.ExecutionContext.Implicits
 import play.api.i18n.{I18nSupport, MessagesApi}
 
-class Application @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport
+class Application @Inject() (val messagesApi: MessagesApi) extends Controller with I18nSupport
 {
 
   def index = Action {implicit request =>

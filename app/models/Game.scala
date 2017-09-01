@@ -44,6 +44,7 @@ object Game {
       " to pull the world of Tamriel into the demonic realm. ")
   )
 
+  val ShowGames = ArrayBuffer(RandomlyGenerateShowGame())
 
   def RandomlyGenerateShowGame(): ArrayBuffer[Game] =
   {
@@ -51,16 +52,24 @@ object Game {
     while (gamesAlreadyGenerated.size != 4)
     {
       var index = scala.util.Random.nextInt(Games.size)
+      var gameisNotInList = 0
       for (i <- 0 to gamesAlreadyGenerated.size -1)
       {
         if(Games(index).name != gamesAlreadyGenerated(i).name)
         {
-          gamesAlreadyGenerated += Games(index)
+          gameisNotInList += 1
         }
+      }
+
+      if(gameisNotInList == gamesAlreadyGenerated.size)
+      {
+        gamesAlreadyGenerated += Games(index)
       }
     }
     gamesAlreadyGenerated:ArrayBuffer[Game]
   }
+
+
 
 }
 
