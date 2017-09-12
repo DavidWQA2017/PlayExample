@@ -3,7 +3,60 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET         /                         controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file             controllers.Assets.at(path="/public", file)
+
+# redirect user on site
+GET         /google                   controllers.Application.redirect
+
+#dynamically set URI so that any number can be entered
+GET         /items/$id<[0-9]+>        controllers.Application.dynamic(id: Long)
+
+# fixed values
+GET         /fixed                    controllers.Application.show(page = "fixed")
+
+#  default values
+GET         /default                  controllers.Application.optional(page: Int ?= 1 )
+
+#/someurl?nameofparameter=valueofparameter
+
+# optional values
+GET         /optional                 controllers.Application.optional2(page: Option[String])
+
+# reverse URI
+GET         /reverse/:name            controllers.Application.reverse(name)
+GET         /reverse                  controllers.Application.bob
+
+
+#same roots different actions
+GET         /bing                     controllers.Application.bingRedirectMessage
+GET         /bing                     controllers.Application.bingRedirect
+
+#default controller actions
+GET         /about                    controllers.Default.redirect(to = "https://www.playframework.com/")
+GET         /orders                   controllers.Default.notFound
+GET         /clients                  controllers.Default.error
+GET         /posts                    controllers.Default.todo
+
+#cookies/flash scope/sessions
+GET         /cookie                   controllers.Application.cookieCreate
+GET         /cookie/cn                controllers.Application.changeCookieName
+GET         /cookie/del               controllers.Application.cookieDelete
+GET         /session                  controllers.Application.newSession
+GET         /session/Info             controllers.Application.readSessionInfo
+GET         /session/discard          controllers.Application.discardSession
+GET         /flash                    controllers.Application.createFlashScope
+
+
+#cd form submission example
+GET         /cds                      controllers.Application.listCDs
+POST        /cds                      controllers.Application.createCD
+
+#Game Store Task
+GET         /ghome                    controllers.Application.gameStoreHome
+
+GET         /+data                   controllers.Mongo.create
+GET         /find/:name              controllers.Mongo.findByName(name)
+GET         /find/:name              controllers.Mongo.findByName(name)

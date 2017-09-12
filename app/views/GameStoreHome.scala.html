@@ -1,0 +1,108 @@
+@(Games: Seq[Game], form: Form[Game])(implicit messages: Messages)
+
+@* the template file is like a function and therefore it can have expected arguments *@
+@* in this case it is expecting a collection of models.CD's for us to display  *@
+@* it also expects a form of type models.CD *@
+@* then we have the implicit messages in the second set of arguments *@
+@* the implicit messages is required for the form helper to build up the form *@
+@* due to the plays ability of supporting internationalisation *@
+
+@main("GameHomePage") {
+
+    @* Some HTML code to list out the models.CD's that we passed in a table with two columns *@
+    <div class="row" style="background-color:black;">
+        <div class="col-md-1">
+        </div>
+    <th> <img src="@routes.Assets.at("images/banner.jpg")" alt="banner" align ="center" style="width:80%;height:50%;" > </th>
+    </div>
+        <div class="row" style="background-color:powderblue;">
+        <div class="col-md-1">
+        </div>
+        <th> <img src="@routes.Assets.at("images/Logo.png")" alt="Logo" align ="center" style="width:64px;height:64px" >
+            <h1  align ="center" style="font-size:600%;"> GAME STORE </h1>
+        </div>
+     </th>
+    <div class="row">
+        <div class="col-md-3">
+            <th><img src="@routes.Assets.at("images/" + Games(0).name + ".png")" alt="game" style="width:50%;height:100%" ></th>
+        </div>
+        <div class="col-md-3">
+            <th><img src="@routes.Assets.at("images/" + Games(1).name + ".png")" alt="game" style="width:50%;height:100%" ></th>
+        </div>
+        <div class="col-md-3">
+            <th><img src="@routes.Assets.at("images/" + Games(2).name + ".png")" alt="game" style="width:50%;height:100%" ></th>
+        </div>
+        <div class="col-md-3">
+            <th><img src="@routes.Assets.at("images/" + Games(3).name + ".png")" alt="game" style="width:50%;height:100%" ></th>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-md-3">
+                <td align ="right"> @Games(0).description</td>
+            </div>
+            <div class="col-md-3">
+                <td align ="right"> @Games(1).description</td>
+            </div>
+            <div class="col-md-3">
+                <td align ="right"> @Games(2).description</td>
+            </div>
+            <div class="col-md-3">
+                <td align ="right"> @Games(3).description</td>
+            </div>
+        </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3" align ="center">
+                <th>Price</th>
+                    <td align ="right"> $@Games(0).price</td>
+            </div>
+            <div class="col-md-3" align ="center">
+                <th>Price</th>
+                    <td align ="right" > $@Games(1).price</td>
+            </div>
+            <div class="col-md-3" align ="center">
+                <th>Price</th>
+                    <td align ="right"> $@Games(2).price</td>
+            </div>
+            <div class="col-md-3" align ="center">
+                <th>Price</th>
+                   <td align ="right"> $@Games(3).price</td>
+            </div>
+        </div>
+    @* helper.form basically replaces the need for you to define the form in HTML *@
+    @* we start by using the helper.form and inside the parentheses we define where this form *@
+    @* will be posted to *@
+    @* after that we define the input text fields to which we pass the form which was passed by the  *@
+    @* controller method and define that this inputText field is the name field which we need for our models.CD case class *@
+    @* additionally we are able to pass other fields for when the text field is created so that the HTML for it  *@
+    @* would have a specific id and a class set *@
+    @* if you don't want to define the additional fields then you can just pass the form and to which case class  *@
+    @* field this maps to *@
+    @* lastly we have a button to actually submit this form *@
+    @helper.form(routes.Application.createCD()) {
+        @* an example of how we can pass additional arguments for the helper *@
+        @* in this models.CD example having '_showConstraints -> false will hide the requirement Required *@
+        @helper.inputText(form("name"), '_label -> "Name", '_showConstraints -> false)
+        @helper.inputText(form("price"), '_label -> "Price" , '_showConstraints -> false)
+        <button type="submit">Add Game</button>
+    }
+
+    @* This helper will generate the HTML for this form and it will look like this *@
+    @* <form action="/cds" method="POST">
+    <dl class=" " id="name_field">
+    <dt><label for="name">Name</label></dt>
+    <dd>
+    <input type="text" id="name" name="name" value="">
+    </dd>
+    </dl>
+    <dl class=" " id="price_field">
+    <dt><label for="price">Price</label></dt>
+    <dd>
+    <input type="text" id="price" name="price" value="">
+    </dd>
+    </dl>
+    <button type="submit">Create models.CD</button>
+    </form> *@
+
+}
+
