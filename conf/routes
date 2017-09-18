@@ -60,3 +60,13 @@ GET         /ghome                    controllers.Application.gameStoreHome
 GET         /+data                   controllers.Mongo.create
 GET         /find/:name              controllers.Mongo.findByName(name)
 GET         /find/:name              controllers.Mongo.findByName(name)
+
+#Streaming exmps
+GET        /stdstream                controllers.Application.streamWithContentLength()
+GET        /servefile                controllers.Application.serveFile()
+GET        /chunk                    controllers.Application.chunked()
+GET        /schunk                   controllers.Application.chunkedFromSource()
+GET        /schunk                   controllers.Application.chunkedFromSource()
+GET        /schunk                   controllers.Application.chunkedFromSource()
+GET        /cometstr                 controllers.Application.cometWithString()
+GET        /cometjson                 controllers.Application.cometWithjson()

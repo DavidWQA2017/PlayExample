@@ -1,21 +1,33 @@
 package controllers
 
 
+import java.io.ByteArrayInputStream
+import java.nio.charset.Charset
 import javax.inject.Inject
+
+import akka.stream.scaladsl.{FileIO, Source, StreamConverters}
+import akka.util.ByteString
 import play.api.mvc.Controller
 import play.modules.reactivemongo._
-
-
 import models.{CD, Game}
 import play.api._
-import play.api.http.Writeable
+import play.api.http.{HttpEntity, Writeable}
+import play.api.libs.json.{JsString, JsValue}
 import play.api.mvc._
 import play.mvc.Http
+
+/////////streaming http responses/////////////
+import akka.stream.Materializer
+import akka.stream.scaladsl.Source
+import play.api.http.ContentTypes
+import play.api.libs.Comet
+import play.api.mvc._
+
 
 import scala.concurrent.ExecutionContext.Implicits
 import play.api.i18n.{I18nSupport, MessagesApi}
 
-class Application @Inject() (val messagesApi: MessagesApi) extends Controller with I18nSupport
+class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materializer) extends Controller with I18nSupport
 {
 
   def index = Action {implicit request =>
@@ -138,10 +150,61 @@ class Application @Inject() (val messagesApi: MessagesApi) extends Controller wi
 
   ////////////////////////////////////////////////////////Game Store Code///////////////////////////////////////////////
   def gameStoreHome = Action { implicit request =>
+
     // we return a view file which expects two arguments passed to it
     // The first argument is the Seq[models.CD] which contains all the CDs we want to display
     // The second argument is the Form[models.CD], where we pass the form we have created
-    Ok(views.html.GameStoreHome(Game.Games, Game.createGameForm))
+    Ok(views.html.GameStoreHome(Game.RandomlyGenerateShowGame(), Game.createGameForm))
+  }
+
+
+
+  ////////////////////////////////////////////////////////Streaming HTTP Responses//////////////////////////////////////
+
+
+  def streamWithContentLength = Action{
+    val file = new java.io.File(".\\public\\temp\\fileToServe.pdf")
+    val path: java.nio.file.Path = file.toPath
+    val source: Source[ByteString, _] = FileIO.fromPath(path)
+
+    val contentLength = Some(file.length())
+
+    Result(
+      header = ResponseHeader(200, Map.empty),
+      body = HttpEntity.Streamed(source, contentLength , Some("application/pdf"))
+    )
+  }
+
+  def serveFile = Action{
+    Ok.sendFile(
+      content = new java.io.File("C:\\Users\\Administrator\\IdeaProjects\\PlayExample\\public\\temp\\fileToServe.pdf"))
+    //,fileName = => "day3Handout.pdf"
+  }
+
+  def chunked = Action
+  {
+    val string: String = "some string to use"
+    val inputStream = new ByteArrayInputStream(string.getBytes(Charset.forName("UTF-8")))
+    val data = inputStream
+    val dataContent: Source[ByteString, _] = StreamConverters.fromInputStream(() => data)
+    Ok.chunked(dataContent)
+  }
+
+  def chunkedFromSource = Action {
+    val source = Source.apply(List("kiki", "foo", "bar"))
+    Ok.chunked(source)
+  }
+
+  def cometWithString = Action {
+    implicit val m = materializer
+    def stringSource: Source[String, _] = Source(List("kiki", "foo", "bar"))
+    Ok.chunked(stringSource via Comet.string("parent.cometMessage")).as (ContentTypes.HTML)
+  }
+
+  def cometWithjson = Action{
+    implicit val m = materializer
+    def jsonSource: Source[JsValue, _] = Source(List(JsString("jsonString")))
+
   }
 
 }
