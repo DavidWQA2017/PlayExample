@@ -3,6 +3,8 @@ package controllers
 
 import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 import akka.stream.scaladsl.{FileIO, Source, StreamConverters}
@@ -26,6 +28,31 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits
 import play.api.i18n.{I18nSupport, MessagesApi}
+
+
+
+
+
+import java.io.{ByteArrayOutputStream, File}
+import javax.imageio.ImageIO
+import javax.inject.Inject
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64
+import models.CD
+import play.api.i18n.{I18nSupport, MessagesApi}
+
+import akka.stream.Materializer
+import play.api.http.ContentTypes
+import play.api.libs.Comet
+import play.api.mvc._
+
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+import akka.stream.scaladsl.Source
+import play.api.libs.json._
+
+import scala.concurrent.duration._
 
 class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materializer) extends Controller with I18nSupport
 {
@@ -195,16 +222,34 @@ class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materi
     Ok.chunked(source)
   }
 
+  def gotochunk = Action
+  {
+    Ok(views.html.chunking())
+  }
   def cometWithString = Action {
     implicit val m = materializer
     def stringSource: Source[String, _] = Source(List("kiki", "foo", "bar"))
     Ok.chunked(stringSource via Comet.string("parent.cometMessage")).as (ContentTypes.HTML)
   }
 
-  def cometWithjson = Action{
+  def cometWithJson = Action{
     implicit val m = materializer
     def jsonSource: Source[JsValue, _] = Source(List(JsString("jsonString")))
+    Ok.chunked(jsonSource via Comet.json("parent.cometMessage")).as(ContentTypes.HTML)
+  }
 
+  def displayClock() = Action{
+    Ok(views.html.ClockHtml())
+  }
+  def streamClock() = Action {
+    Ok.chunked(stringSource via Comet.string("parent.clockChanged")).as(ContentTypes.HTML)
+  }
+
+  def stringSource: Source[String, _] = {
+    val df: DateTimeFormatter = DateTimeFormatter.ofPattern("HH mm ss")
+    val tickSource = Source.tick(0 millis, 100 millis, "TICK")
+    val s = tickSource.map((tick) => df.format(ZonedDateTime.now()))
+    s
   }
 
 }
