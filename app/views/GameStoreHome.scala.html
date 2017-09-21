@@ -1,6 +1,7 @@
-@(Games: Seq[Game], form: Form[Game])(implicit messages: Messages)
+@(Games: Seq[Game], form: Form[Game])(implicit messages: Messages, request:RequestHeader)
 
-@* the template file is like a function and therefore it can have expected arguments *@
+
+    @* the template file is like a function and therefore it can have expected arguments *@
 @* in this case it is expecting a collection of models.CD's for us to display  *@
 @* it also expects a form of type models.CD *@
 @* then we have the implicit messages in the second set of arguments *@

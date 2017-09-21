@@ -12,6 +12,7 @@ import akka.util.ByteString
 import play.api.mvc.Controller
 import play.modules.reactivemongo._
 import models.{CD, Game}
+import org.h2.engine.User
 import play.api._
 import play.api.http.{HttpEntity, Writeable}
 import play.api.libs.json.{JsString, JsValue}
@@ -28,87 +29,83 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits
 import play.api.i18n.{I18nSupport, MessagesApi}
-
-
-
-
-
 import java.io.{ByteArrayOutputStream, File}
 import javax.imageio.ImageIO
-import javax.inject.Inject
+
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64
 import models.CD
 import play.api.i18n.{I18nSupport, MessagesApi}
-
-import akka.stream.Materializer
-import play.api.http.ContentTypes
-import play.api.libs.Comet
-import play.api.mvc._
-
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-
-import akka.stream.scaladsl.Source
 import play.api.libs.json._
 
 import scala.concurrent.duration._
 
-class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materializer) extends Controller with I18nSupport
-{
+//////////////////////////////////////Caching///////////////////////////////////////////////////////////////////////////
+import play.api.cache._
+import play.api.mvc._
+import scala.concurrent.duration._
 
-  def index = Action {implicit request =>
-    Ok{request.flash.get("success").getOrElse("Welcome!")}
-    //Ok(views.html.index("Your new application is ready."))
+//////////////////////////////////////////Website///////////////////////////////////////////////////////////////////////
+import javax.inject.Inject
+import play.api.http.DefaultHttpFilters
+
+
+///
+class Application @Inject() (val messagesApi: MessagesApi)(
+  materializer: Materializer, sessionCache: CacheApi, cached: Cached) extends Controller with I18nSupport {
+
+  def index = Action { implicit request =>
+    //Ok{request.flash.get("success").getOrElse("Welcome!")}
+    Ok(views.html.LangHome())
   }
 
-  def dynamic (id: Long) = Action {
+  def dynamic (id: Long) = Action {  implicit request =>
     Ok("hello i am a dynamic URI")
   }
 
-  def show (page: String) = Action {
+  def show (page: String) = Action {  implicit request =>
     Ok(page)
   }
 
-  def optional (page: Int) = Action {
+  def optional (page: Int) = Action {  implicit request =>
     Ok(page.toString)
   }
 
-  def optional2 (page: Option[String]) = Action {
+  def optional2 (page: Option[String]) = Action {  implicit request =>
     Ok(page.toString)
   }
 
-  def reverse(name: String) = Action {
+  def reverse(name: String) = Action {  implicit request =>
     Ok("Hello " + name + "!")
   }
 
-  def bob = Action {
+  def bob = Action {  implicit request =>
     Redirect(routes.Application.reverse("bob"))
   }
 
-  def redirect = Action {
+  def redirect = Action {  implicit request =>
     Redirect("https://www.google.co.uk")
   }
 
   def bingRedirect = Action
-  {
+  {  implicit request =>
     Redirect("https://www.bing.co.uk")
   }
 
   def bingRedirectMessage = Action
-  {
+  {  implicit request =>
     Ok("why would you do that?")
   }
 
   def aToDo = TODO
 
   def cookieCreate = Action
-  {
+  { implicit request =>
     Ok("i am a single cookie").withCookies(Cookie("theme", "blue"))
   }
 
   def cookieDelete = Action
-  {
+  { implicit request =>
     Ok("all the cookies are gone").discardingCookies((DiscardingCookie("theme")))
   }
 
@@ -189,7 +186,9 @@ class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materi
   ////////////////////////////////////////////////////////Streaming HTTP Responses//////////////////////////////////////
 
 
-  def streamWithContentLength = Action{
+
+
+  def streamWithContentLength = Action{  implicit request =>
     val file = new java.io.File(".\\public\\temp\\fileToServe.pdf")
     val path: java.nio.file.Path = file.toPath
     val source: Source[ByteString, _] = FileIO.fromPath(path)
@@ -202,14 +201,14 @@ class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materi
     )
   }
 
-  def serveFile = Action{
+  def serveFile = Action{ implicit request =>
     Ok.sendFile(
       content = new java.io.File("C:\\Users\\Administrator\\IdeaProjects\\PlayExample\\public\\temp\\fileToServe.pdf"))
     //,fileName = => "day3Handout.pdf"
   }
 
   def chunked = Action
-  {
+  {  implicit request =>
     val string: String = "some string to use"
     val inputStream = new ByteArrayInputStream(string.getBytes(Charset.forName("UTF-8")))
     val data = inputStream
@@ -217,31 +216,32 @@ class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materi
     Ok.chunked(dataContent)
   }
 
-  def chunkedFromSource = Action {
+  def chunkedFromSource = Action {  implicit request =>
     val source = Source.apply(List("kiki", "foo", "bar"))
     Ok.chunked(source)
   }
 
   def gotochunk = Action
-  {
+  { implicit request =>
     Ok(views.html.chunking())
   }
-  def cometWithString = Action {
+
+  def cometWithString = Action { implicit request =>
     implicit val m = materializer
     def stringSource: Source[String, _] = Source(List("kiki", "foo", "bar"))
     Ok.chunked(stringSource via Comet.string("parent.cometMessage")).as (ContentTypes.HTML)
   }
 
-  def cometWithJson = Action{
+  def cometWithJson = Action{  implicit request =>
     implicit val m = materializer
     def jsonSource: Source[JsValue, _] = Source(List(JsString("jsonString")))
     Ok.chunked(jsonSource via Comet.json("parent.cometMessage")).as(ContentTypes.HTML)
   }
 
-  def displayClock() = Action{
+  def displayClock() = Action{ implicit request =>
     Ok(views.html.ClockHtml())
   }
-  def streamClock() = Action {
+  def streamClock() = Action { implicit request =>
     Ok.chunked(stringSource via Comet.string("parent.clockChanged")).as(ContentTypes.HTML)
   }
 
@@ -251,5 +251,42 @@ class Application @Inject() (val messagesApi: MessagesApi) (materializer: Materi
     val s = tickSource.map((tick) => df.format(ZonedDateTime.now()))
     s
   }
+
+  ////////////////////////////////////////////////////////caching//////////////////////////////////////////////////////
+//  cache.set("item.key", connectedUser, 5 minutes)
+//  def getUserCache{
+//      val user: User = cache.getOrElse[User]("item.key")
+//      {
+//        User.findById(connectedUser)
+//      }
+//  }
+//
+//  def deleteUserCache{
+//    cache.remove("item.key")
+//  }
+
+  def indexCached = cached("homePage") {
+    Action{implicit request =>
+      Ok("Hello world")
+    }
+  }
+
+  def getNoUniqueKey() = cached.status(_ => s"/get/", 200) {
+    Action { implicit request =>
+      Ok("Hello world")
+    }
+  }
+
+  def get(index: String) = cached.status(_ => s"/resource/$index", 200) {
+    Action {  implicit request =>
+      if (index.toInt > 0) {
+        Ok(Json.obj("id" -> index))
+      } else {
+        NotFound
+      }
+    }
+  }
+
+
 
 }

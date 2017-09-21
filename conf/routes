@@ -66,10 +66,15 @@ GET        /stdstream                controllers.Application.streamWithContentLe
 GET        /servefile                controllers.Application.serveFile()
 GET        /chunk                    controllers.Application.chunked()
 GET        /schunk                   controllers.Application.chunkedFromSource()
-GET        /schunk                   controllers.Application.chunkedFromSource()
-GET        /schunk                   controllers.Application.chunkedFromSource()
+
 GET        /comet                    controllers.Application.cometWithString()
 GET        /comet                    controllers.Application.cometWithJson()
-GET        /clock                    controllers.Application.displayClock()
 GET        /chunking                 controllers.Application.gotochunk()
+
+GET        /clock                    controllers.Application.displayClock()
 GET        /streamClock              controllers.Application.streamClock()
+
+#caching examps
+#GET        /cachei                  controllers.Application.indexCached()
+GET         /get/:index              controllers.Application.get(index)
+GET         /lang/:lang/:uri         controllers.InternationalLang.switchToLanguage(lang: String, uri: String)
