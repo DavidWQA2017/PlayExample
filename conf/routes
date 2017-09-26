@@ -60,3 +60,21 @@ GET         /ghome                    controllers.Application.gameStoreHome
 GET         /+data                   controllers.Mongo.create
 GET         /find/:name              controllers.Mongo.findByName(name)
 GET         /find/:name              controllers.Mongo.findByName(name)
+
+#Streaming exmps
+GET        /stdstream                controllers.Application.streamWithContentLength()
+GET        /servefile                controllers.Application.serveFile()
+GET        /chunk                    controllers.Application.chunked()
+GET        /schunk                   controllers.Application.chunkedFromSource()
+
+GET        /comet                    controllers.Application.cometWithString()
+GET        /comet                    controllers.Application.cometWithJson()
+GET        /chunking                 controllers.Application.gotochunk()
+
+GET        /clock                    controllers.Application.displayClock()
+GET        /streamClock              controllers.Application.streamClock()
+
+#caching examps
+#GET        /cachei                  controllers.Application.indexCached()
+GET         /get/:index              controllers.Application.get(index)
+GET         /lang/:lang/:uri         controllers.InternationalLang.switchToLanguage(lang: String, uri: String)

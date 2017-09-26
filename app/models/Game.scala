@@ -17,7 +17,7 @@ object Game {
   // in this particular case name will need some string passed to it, and an empty one wouldn't work
   // for the price we say that it has to be of numerical value, where the minimum value is going to be 0
   // and the maximum value will be 100
-  // we then follow the closing parentse of mapping by having the apply unapply methods
+  // we then follow the closing parents of mapping by having the apply unapply methods
   // which are needed for the data to be mapped to the model fields
   val createGameForm = Form(
     mapping(
@@ -41,14 +41,17 @@ object Game {
       + " new boundaries while honouring the origins of the acclaimed series."),
     Game("ElderScrollsOnline", 15, "Experience an entirely new chapter in the Elder Scrolls series set a thousand years" +
       " before the events of Skyrim. Take up arms as one of the three factions, as the daedric prince Molag Bal attempts" +
-      " to pull the world of Tamriel into the demonic realm. ")
+      " to pull the world of Tamriel into the demonic realm. "),
+    Game("CallofDutyWW2", 50, "Call of Duty® returns to its roots with Call of Duty®: WWII - an experience that redefines " +
+      "World War II for a new gaming generation. Call of Duty®: WWII tells the story of heroism on a global scale, " +
+      "through the unbreakable brotherhood of common men fighting to preserve freedom in a world on the brink of tyranny.")
   )
 
   val ShowGames = ArrayBuffer(RandomlyGenerateShowGame())
 
   def RandomlyGenerateShowGame(): ArrayBuffer[Game] =
   {
-    var gamesAlreadyGenerated:ArrayBuffer[Game] = new ArrayBuffer[Game] += Games(0)
+    var gamesAlreadyGenerated:ArrayBuffer[Game] = new ArrayBuffer[Game] += Games(scala.util.Random.nextInt(Games.size))
     while (gamesAlreadyGenerated.size != 4)
     {
       var index = scala.util.Random.nextInt(Games.size)

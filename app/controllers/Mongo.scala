@@ -60,7 +60,7 @@ class Mongo @Inject()(
   import models.JsonFormats._
 
   def create = Action.async {
-    val user = GameEntry(29, "John", "Smith", List(
+    val user = GameEntry(29, "John", "Smith", List())
       //Feed("Slashdot news", "http://slashdot.org/slashdot.rdf")))
 
     // insert the DB
